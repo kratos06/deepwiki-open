@@ -22,10 +22,25 @@ if google_api_key:
 else:
     logger.warning("GOOGLE_API_KEY not found in environment variables")
 
-# Initialize FastAPI app
+# Import MCP service manager
+try:
+    from api.mcp_service import mcp_lifespan_manager
+except ImportError:
+    # Fallback for when running from api directory
+    import sys
+    import os
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    try:
+        from api.mcp_service import mcp_lifespan_manager
+    except ImportError:
+        # Final fallback - import directly
+        from mcp_service import mcp_lifespan_manager
+
+# Initialize FastAPI app with MCP integration
 app = FastAPI(
-    title="Streaming API",
-    description="API for streaming chat completions"
+    title="DeepWiki API",
+    description="API for streaming chat completions and MCP server integration",
+    lifespan=mcp_lifespan_manager
 )
 
 # Configure CORS
@@ -480,12 +495,22 @@ async def health_check():
         "service": "deepwiki-api"
     }
 
+@app.get("/mcp/status")
+async def get_mcp_server_status():
+    """Get detailed MCP server status and information"""
+    from api.mcp_service import get_mcp_status
+    return await get_mcp_status()
+
 @app.get("/")
 async def root():
     """Root endpoint to check if the API is running"""
     return {
-        "message": "Welcome to Streaming API",
+        "message": "Welcome to DeepWiki API",
         "version": "1.0.0",
+        "services": {
+            "web_api": "Running",
+            "mcp_server": "Running" if hasattr(app.state, 'mcp_server') else "Not started"
+        },
         "endpoints": {
             "Chat": [
                 "POST /chat/completions/stream - Streaming chat completion (HTTP)",
@@ -498,6 +523,13 @@ async def root():
             ],
             "LocalRepo": [
                 "GET /local_repo/structure - Get structure of a local repository (with path parameter)",
+            ],
+            "MCP": [
+                "GET /mcp/status - MCP server status and information",
+                "MCP Server - Model Context Protocol server for Claude Desktop integration",
+                "Available tools: ask_deepwiki, query_code, get_file_content",
+                "Available resources: repo structure, wiki cache, file lists",
+                "Available prompts: code analysis, debugging, review checklists"
             ],
             "Health": [
                 "GET /health - Health check endpoint"

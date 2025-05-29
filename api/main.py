@@ -42,10 +42,18 @@ if __name__ == "__main__":
     # Get port from environment variable or use default
     port = int(os.environ.get("PORT", 8001))
 
-    # Import the app here to ensure environment variables are set first
-    from api.api import app
+    # Check if MCP server should be enabled
+    enable_mcp = os.environ.get("ENABLE_MCP_SERVER", "true").lower() == "true"
 
-    logger.info(f"Starting Streaming API on port {port}")
+    logger.info(f"Starting DeepWiki API on port {port}")
+    if enable_mcp:
+        logger.info("MCP server integration enabled")
+    else:
+        logger.info("MCP server integration disabled")
+
+    # Import the app here to ensure environment variables are set first
+    # The app will now include MCP server integration via lifespan events
+    from api.api import app
 
     # Run the FastAPI app with uvicorn
     # Disable reload in production/Docker environment

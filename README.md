@@ -26,6 +26,7 @@
 - **Ask Feature**: Chat with your repository using RAG-powered AI to get accurate answers
 - **DeepResearch**: Multi-turn research process that thoroughly investigates complex topics
 - **Multiple Model Providers**: Support for Google Gemini, OpenAI, OpenRouter, and local Ollama models
+- **MCP Server**: Model Context Protocol server for integration with MCP clients like Claude Desktop
 
 ## 🚀 Quick Start (Super Easy!)
 
@@ -391,6 +392,63 @@ DeepResearch takes repository analysis to the next level with a multi-turn resea
   3. **Final Conclusion**: Provides a comprehensive answer based on all iterations
 
 To use DeepResearch, simply toggle the "Deep Research" switch in the Ask interface before submitting your question.
+
+## 🔌 MCP Server Integration
+
+DeepWiki now includes a Model Context Protocol (MCP) server that allows integration with MCP clients like Claude Desktop. This enables you to access DeepWiki's code analysis capabilities directly from compatible AI applications.
+
+### Features
+
+- **Code Query Tools**: Ask questions about repositories using RAG
+- **Repository Resources**: Access repository structure and cached wiki content
+- **Analysis Prompts**: Pre-built prompts for code analysis, debugging, and review
+
+### Quick Setup
+
+1. **Install dependencies**:
+   ```bash
+   uv sync  # or pip install -r api/requirements.txt
+   ```
+
+2. **Start DeepWiki with MCP integration**:
+   ```bash
+   # Start both Web API and MCP server (recommended)
+   python start_deepwiki.py
+
+   # Or start only specific services
+   python start_deepwiki.py --mode web    # Web API only
+   python start_deepwiki.py --mode mcp    # MCP server only
+   ```
+
+3. **Install in Claude Desktop**:
+   ```bash
+   mcp install mcp_deepwiki.py --name "DeepWiki Code Assistant"
+   ```
+
+4. **Use in Claude Desktop**:
+   ```
+   Please use the ask_deepwiki tool to analyze the architecture of https://github.com/microsoft/vscode
+   ```
+
+For detailed MCP setup and usage instructions, see [MCP_README.md](MCP_README.md).
+
+## 🧪 Testing
+
+DeepWiki includes a comprehensive test suite for MCP functionality:
+
+```bash
+# Run all tests
+uv run python test/run_all_tests.py
+
+# Run specific tests
+uv run python test/test_integration.py      # Integration tests
+uv run python test/test_mcp_server.py       # MCP functionality tests
+uv run python test/test_mcp_protocol.py     # Protocol tests
+uv run python test/test_mcp_client.py       # Client simulation tests
+./test/test_mcp_curl.sh                     # HTTP API tests
+```
+
+See [test/README.md](test/README.md) for detailed testing documentation.
 
 ## 📱 Screenshots
 
